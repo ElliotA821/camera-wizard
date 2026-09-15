@@ -1,0 +1,1 @@
+{"name":"camera-wizard","version":"2.0.0","private":true,"description":"Offline X-M5 photographic shooting assistant","scripts":{"start":"node server.cjs","test":"node --test tests/engine.test.cjs tests/advisor.test.cjs","docs":"node build-docs.cjs"}}

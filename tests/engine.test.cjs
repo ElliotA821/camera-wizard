@@ -1,0 +1,14 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const {calculate}=require('../dist/engine.js');
+const base={ev:12,crop:1,focal:50,maxAperture:1.8,support:'handheld',stops:0,dof:'balanced',motion:'posed',maxISO:3200,comp:0,raw:true};
+test('EV equation balances a daylight exposure',()=>{const r=calculate(base);assert.ok(Math.abs(r.error)<.25);assert.equal(r.aperture,4);assert.ok(r.shutter<=1/125);});
+test('one stop compensation doubles needed ISO when shutter is constrained',()=>{const a=calculate({...base,ev:6}),b=calculate({...base,ev:6,comp:1});assert.equal(b.neededISO/a.neededISO,2);});
+test('insufficient light never silently exceeds ISO ceiling',()=>{const r=calculate({...base,ev:-2,motion:'fast',maxISO:800});assert.equal(r.iso,800);assert.ok(r.insufficient);assert.ok(r.error<-5);});
+test('stabilisation cannot freeze subject movement',()=>{const a=calculate({...base,ev:5,stops:0,motion:'active'}),b=calculate({...base,ev:5,stops:5,motion:'active'});assert.equal(a.shutter,b.shutter);});
+test('stabilisation and tripod help a still subject',()=>{const a=calculate({...base,ev:4,motion:'still'}),b=calculate({...base,ev:4,motion:'still',stops:3}),c=calculate({...base,ev:4,motion:'still',support:'tripod'});assert.ok(b.shutter>a.shutter);assert.ok(c.iso<=b.iso);});
+test('crop affects shake, not exposure equation',()=>{const a=calculate({...base,ev:5,motion:'still'}),b=calculate({...base,ev:5,motion:'still',crop:2});assert.ok(b.shutter<a.shutter);assert.ok(Math.abs(a.neededISO*a.shutter-b.neededISO*b.shutter)<1e-8);});
+test('lens maximum is respected and RAW has no exposure bonus',()=>{const a=calculate({...base,maxAperture:5.6,dof:'shallow'}),b=calculate({...base,maxAperture:5.6,dof:'shallow',raw:false});assert.equal(a.aperture,5.6);assert.deepEqual(a,b);});
+test('motion blur stays at 1/15 and flags excess daylight',()=>{const r=calculate({...base,ev:15,motion:'blur'});assert.equal(r.shutter,1/15);assert.ok(r.excess);assert.ok(r.alternatives.some(a=>a.settings.includes('ND')));});
+test('bright light and fast shutter boundary are explicit',()=>{const r=calculate({...base,ev:18,dof:'shallow',maxAperture:.7});assert.equal(r.shutter,1/8000);assert.ok(r.excess);});
+test('invalid values are rejected',()=>{for(const change of [{focal:NaN},{maxAperture:0},{maxISO:50},{crop:0},{motion:'unknown'}]) assert.throws(()=>calculate({...base,...change}));});
+test('broad scenario grid respects hardware limits and finite results',()=>{for(const ev of [-6,0,6,12,18])for(const motion of ['still','posed','walking','active','fast','blur'])for(const crop of [.79,1,1.5,2,2.7])for(const support of ['handheld','tripod']){const r=calculate({...base,ev,motion,crop,support});assert.ok(r.iso>=100&&r.iso<=base.maxISO);assert.ok(r.shutter>=1/8000&&r.shutter<=30);assert.ok(Number.isFinite(r.error));}});
