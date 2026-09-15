@@ -163,7 +163,7 @@ let refreshPending=false;
 if('serviceWorker' in navigator&&['http:','https:'].includes(location.protocol)){
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshPending)location.reload();});
   $('update-app').addEventListener('click',()=>{refreshPending=true;});
-  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>{
+  navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).then(reg=>{
     registration=reg;showUpdate();
     reg.addEventListener('updatefound',()=>{const installing=reg.installing;installing?.addEventListener('statechange',()=>{if(installing.state==='installed')showUpdate();});});
     return navigator.serviceWorker.ready;

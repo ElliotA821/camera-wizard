@@ -1,0 +1,15 @@
+CAMERA WIZARD — COMPLETE GITHUB UPLOAD
+
+1. Extract this ZIP on your computer. Do not upload the ZIP itself.
+2. Open https://github.com/ElliotA821/camera-wizard
+3. Choose Add file > Upload files.
+4. Drag ALL extracted files and folders into the upload area, including .github, dist and tests. Upload them at the repository root, without an extra enclosing folder. Commit the upload to your default branch.
+5. Under Settings > Pages > Build and deployment > Source, select GitHub Actions.
+6. Open Actions > Deploy Camera Wizard to GitHub Pages > Run workflow. Select your default branch and run it.
+7. When deployment succeeds, visit https://elliota821.github.io/camera-wizard/
+
+This is the complete application, not a patch. Keep the folder structure intact. The .github folder contains the deployment workflow and must be uploaded too. If your file browser hides it, enable hidden files.
+
+GitHub uploads replace matching paths but do not delete unrelated old files. If another Pages deployment workflow already exists, remove that obsolete workflow so only pages.yml deploys this application. You do not need to delete or recreate your repository.
+
+After the first online visit, wait for Ready for offline use in the app's install help. On iPhone, open the site in Safari and use Share > Add to Home Screen.
